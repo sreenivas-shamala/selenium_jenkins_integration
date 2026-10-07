@@ -1,0 +1,3 @@
+test/java/tests/BaseTest.class
+test/java/tests/LoginTest.class
+test/java/listeners/TestListener.class

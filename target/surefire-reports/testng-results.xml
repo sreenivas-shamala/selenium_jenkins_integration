@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testng-results ignored="0" total="1" passed="1" failed="0" skipped="0">
+  <reporter-output>
+  </reporter-output>
+  <suite started-at="2026-10-07T14:43:36 IST" name="Selenium Test Suite" finished-at="2026-10-07T14:43:41 IST" duration-ms="5223">
+    <groups>
+    </groups>
+    <test started-at="2026-10-07T14:43:36 IST" name="Regression Tests" finished-at="2026-10-07T14:43:41 IST" duration-ms="5223">
+      <class name="test.java.tests.LoginTest">
+        <test-method is-config="true" signature="setUp()[pri:0, instance:test.java.tests.LoginTest@f8c1ddd]" started-at="2026-10-07T14:43:36 IST" name="setUp" finished-at="2026-10-07T14:43:38 IST" duration-ms="2246" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- setUp -->
+        <test-method signature="verifyGoogleTitle()[pri:0, instance:test.java.tests.LoginTest@f8c1ddd]" started-at="2026-10-07T14:43:38 IST" name="verifyGoogleTitle" finished-at="2026-10-07T14:43:41 IST" duration-ms="2825" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- verifyGoogleTitle -->
+        <test-method is-config="true" signature="tearDown()[pri:0, instance:test.java.tests.LoginTest@f8c1ddd]" started-at="2026-10-07T14:43:41 IST" name="tearDown" finished-at="2026-10-07T14:43:41 IST" duration-ms="125" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- tearDown -->
+      </class> <!-- test.java.tests.LoginTest -->
+    </test> <!-- Regression Tests -->
+  </suite> <!-- Selenium Test Suite -->
+</testng-results>

@@ -1,0 +1,15 @@
+<suite name="Selenium Test Suite">
+
+    <listeners>
+        <listener class-name="test.java.listeners.TestListener"/>
+    </listeners>
+
+    <test name="Regression Tests">
+
+        <classes>
+            <class name="test.java.tests.LoginTest"/>
+        </classes>
+
+    </test>
+
+</suite>
