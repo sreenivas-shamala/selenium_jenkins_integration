@@ -11,7 +11,7 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git branch: 'main', url:'https://github.com/sreenivas-shamala/flask-app.git'
+                git branch: 'main', url:'https://github.com/sreenivas-shamala/selenium_jenkins_integration.git'
                 
             }
         }
