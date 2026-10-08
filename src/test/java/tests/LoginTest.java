@@ -8,7 +8,9 @@ public class LoginTest extends BaseTest {
 
     @Test
     public void verifyGoogleTitle() {
+        String appUrl = System.getProperty("app.url","http://flask-app-service");
 
+        //driver.get(appUrl);
         driver.get("https://www.google.com");
 
         String title = driver.getTitle();
