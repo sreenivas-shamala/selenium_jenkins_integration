@@ -3,58 +3,119 @@ pipeline {
     agent any
 
     environment {
+        IMAGE_NAME = "sreenivasulusamala108/selenium-tests"
+        IMAGE_TAG = "v1"
         PATH = "/usr/local/bin:${env.PATH}"
     }
 
+        
     stages {
 
         stage('Checkout') {
             steps {
-               steps {
                 git branch: 'main', url:'https://github.com/sreenivas-shamala/selenium_jenkins_integration.git'
-                
-            }
             }
         }
 
-        stage('Test Kubernetes') {
+        stage('Build Docker Image') {
             steps {
-                withCredentials([
-                    file(
-                        credentialsId: 'k8s_config',
-                        variable: 'KUBECONFIG'
-                    )
-                ]) {
+                sh 'docker build -t $IMAGE_NAME:$IMAGE_TAG .'
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+
                     sh '''
-                        set -e
-
-                        echo "=== kubectl ==="
-                        which kubectl
-                        kubectl version --client
-
-                        echo "=== Context ==="
-                        kubectl config current-context
-
-                        echo "=== Nodes ==="
-                        kubectl get nodes
+                    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                    docker push $IMAGE_NAME:$IMAGE_TAG
                     '''
                 }
             }
         }
 
-       
+       stage('Check kubectl') {
+    steps {
+        sh '''
+            echo "PATH=$PATH"
+            which kubectl
+            kubectl version --client
+        '''
+    }
+}
+        stage('Test Kubernetes') {
+    steps {
+        withCredentials([
+            file(
+                credentialsId: 'k8s_config',
+                variable: 'KUBECONFIG'
+            )
+        ]) {
+            sh '''
+                set -e
 
-      
+                echo "===== kubectl ====="
+                which kubectl
+                kubectl version --client
 
-        stage('Build Selenium Docker Image') {
+                echo "===== KUBECONFIG ====="
+                ls -l "$KUBECONFIG"
+
+                echo "===== CONTEXT ====="
+                kubectl config current-context
+
+                echo "===== API SERVER ====="
+                kubectl config view --minify \
+                    -o jsonpath='{.clusters[0].cluster.server}'
+                echo
+
+                echo "===== CLUSTER INFO ====="
+                kubectl cluster-info
+
+                echo "===== NODES ====="
+                kubectl get nodes
+            '''
+        }
+    }
+}
+             
+        stage('Deploy to Kubernetes') {
             steps {
+                withCredentials([file( credentialsId: 'k8s_config', variable: 'KUBECONFIG' )])
+                { 
                 sh '''
-                    docker build -t selenium-tests:v1 .
+                               
+                echo "=== Applying deployment ===" 
+                kubectl apply -f selenium-jenkins-app.yaml
                 '''
+               }  
             }
         }
 
-        stage('Run Selenium Tests') {
+        stage('Verify Deployment') {
+            steps {
+                withCredentials([file( credentialsId: 'k8s_config', variable: 'KUBECONFIG' )])
+                {
+                sh '''
+                
+                kubectl get deployments
+
+                kubectl get pods
+               
+                kubectl get services
+                
+                '''
+                }    
+           
+           }
+      }
+
+ stage('Run Selenium Tests') {
             steps {
                 withCredentials([
                     file(
@@ -92,7 +153,10 @@ pipeline {
                 }
             }
         }
+
+
     }
+
 
     post {
 
