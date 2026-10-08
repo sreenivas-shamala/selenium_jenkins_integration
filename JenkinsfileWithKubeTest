@@ -3,126 +3,142 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "sreenivasulusamala108/selenium-jenkins-app"
-        IMAGE_TAG = "v1"
         PATH = "/usr/local/bin:${env.PATH}"
     }
 
-        
     stages {
 
         stage('Checkout') {
             steps {
-                git branch: 'main', 
-                url:'https://github.com/sreenivas-shamala/selenium_jenkins_integration.git'
+                checkout scm
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Test Kubernetes') {
             steps {
-                sh 'docker build -t $IMAGE_NAME:$IMAGE_TAG .'
-            }
-        }
-
-        stage('Push Docker Image') {
-            steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )]) {
-
+                withCredentials([
+                    file(
+                        credentialsId: 'k8s-config',
+                        variable: 'KUBECONFIG'
+                    )
+                ]) {
                     sh '''
-                    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-                    docker push $IMAGE_NAME:$IMAGE_TAG
+                        set -e
+
+                        echo "=== kubectl ==="
+                        which kubectl
+                        kubectl version --client
+
+                        echo "=== Context ==="
+                        kubectl config current-context
+
+                        echo "=== Nodes ==="
+                        kubectl get nodes
                     '''
                 }
             }
         }
 
-       stage('Check kubectl') {
-    steps {
-        sh '''
-            echo "PATH=$PATH"
-            which kubectl
-            kubectl version --client
-        '''
-    }
-}
-        stage('Test Kubernetes') {
-    steps {
-        withCredentials([
-            file(
-                credentialsId: 'k8s_config',
-                variable: 'KUBECONFIG'
-            )
-        ]) {
-            sh '''
-                set -e
-
-                echo "===== kubectl ====="
-                which kubectl
-                kubectl version --client
-
-                echo "===== KUBECONFIG ====="
-                ls -l "$KUBECONFIG"
-
-                echo "===== CONTEXT ====="
-                kubectl config current-context
-
-                echo "===== API SERVER ====="
-                kubectl config view --minify \
-                    -o jsonpath='{.clusters[0].cluster.server}'
-                echo
-
-                echo "===== CLUSTER INFO ====="
-                kubectl cluster-info
-
-                echo "===== NODES ====="
-                kubectl get nodes
-            '''
-        }
-    }
-}
-             
-        stage('Deploy to Kubernetes') {
+        stage('Build Flask Docker Image') {
             steps {
-                withCredentials([file( credentialsId: 'k8s_config', variable: 'KUBECONFIG' )])
-                { 
                 sh '''
-                               
-                echo "=== Applying deployment ===" 
-                kubectl apply -f selenium-jenkins-app.yaml
+                    docker build \
+                        -t flask-app:v1 \
+                        .
                 '''
-               }  
             }
         }
 
-        stage('Verify Deployment') {
+        stage('Deploy Flask') {
             steps {
-                withCredentials([file( credentialsId: 'k8s_config', variable: 'KUBECONFIG' )])
-                {
-                sh '''
-                
-                kubectl get deployments
+                withCredentials([
+                    file(
+                        credentialsId: 'k8s-config',
+                        variable: 'KUBECONFIG'
+                    )
+                ]) {
+                    sh '''
+                        set -e
 
-                kubectl get pods
-               
-                kubectl get services
-                
+                        kubectl apply -f flask-app.yaml
+
+                        kubectl rollout status \
+                            deployment/flask-app \
+                            --timeout=180s
+
+                        kubectl get pods
+                        kubectl get service flask-app-service
+                    '''
+                }
+            }
+        }
+
+        stage('Build Selenium Docker Image') {
+            steps {
+                sh '''
+                    docker build \
+                        -t selenium-tests:v1 \
+                        ./selenium-tests
                 '''
-                }    
-           
-           }
-      }
+            }
+        }
+
+        stage('Run Selenium Tests') {
+            steps {
+                withCredentials([
+                    file(
+                        credentialsId: 'k8s-config',
+                        variable: 'KUBECONFIG'
+                    )
+                ]) {
+                    sh '''
+                        set -e
+
+                        echo "=== Delete previous Selenium Job ==="
+                        kubectl delete job selenium-test \
+                            --ignore-not-found=true
+
+                        echo "=== Start Selenium Job ==="
+                        kubectl apply -f selenium-test.yaml
+
+                        echo "=== Wait for Selenium tests ==="
+                        kubectl wait \
+                            --for=condition=complete \
+                            job/selenium-test \
+                            --timeout=300s
+                    '''
+                }
+            }
+        }
+
+        stage('Selenium Test Logs') {
+            steps {
+                withCredentials([
+                    file(
+                        credentialsId: 'k8s-config',
+                        variable: 'KUBECONFIG'
+                    )
+                ]) {
+                    sh '''
+                        kubectl logs job/selenium-test
+                    '''
+                }
+            }
+        }
     }
+
     post {
+
+        always {
+            echo 'Pipeline completed'
+        }
+
         success {
-            echo "Deployment Successful!"
+            echo 'Selenium tests passed'
         }
 
         failure {
-            echo "Pipeline Failed!"
+            echo 'Selenium tests failed'
         }
     }
 }
