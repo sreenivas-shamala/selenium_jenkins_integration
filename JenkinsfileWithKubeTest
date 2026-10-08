@@ -10,7 +10,10 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                checkout scm
+               steps {
+                git branch: 'main', url:'https://github.com/sreenivas-shamala/selenium_jenkins_integration.git'
+                
+            }
             }
         }
 
@@ -18,7 +21,7 @@ pipeline {
             steps {
                 withCredentials([
                     file(
-                        credentialsId: 'k8s-config',
+                        credentialsId: 'k8s_config',
                         variable: 'KUBECONFIG'
                     )
                 ]) {
@@ -46,9 +49,7 @@ pipeline {
         stage('Build Selenium Docker Image') {
             steps {
                 sh '''
-                    docker build \
-                        -t selenium-tests:v1 \
-                        ./selenium-tests
+                    docker build -t selenium-tests:v1 .
                 '''
             }
         }
@@ -57,7 +58,7 @@ pipeline {
             steps {
                 withCredentials([
                     file(
-                        credentialsId: 'k8s-config',
+                        credentialsId: 'k8s_config',
                         variable: 'KUBECONFIG'
                     )
                 ]) {
@@ -65,17 +66,13 @@ pipeline {
                         set -e
 
                         echo "=== Delete previous Selenium Job ==="
-                        kubectl delete job selenium-test \
-                            --ignore-not-found=true
+                        kubectl delete job selenium-test --ignore-not-found=true
 
                         echo "=== Start Selenium Job ==="
-                        kubectl apply -f selenium-test.yaml
+                        kubectl apply -f selenium-jenkins-app.yaml
 
                         echo "=== Wait for Selenium tests ==="
-                        kubectl wait \
-                            --for=condition=complete \
-                            job/selenium-test \
-                            --timeout=300s
+                        kubectl wait --for=condition=complete job/selenium-test --timeout=300s
                     '''
                 }
             }
@@ -85,7 +82,7 @@ pipeline {
             steps {
                 withCredentials([
                     file(
-                        credentialsId: 'k8s-config',
+                        credentialsId: 'k8s_config',
                         variable: 'KUBECONFIG'
                     )
                 ]) {
