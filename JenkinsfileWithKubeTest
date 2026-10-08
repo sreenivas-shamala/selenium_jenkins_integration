@@ -39,39 +39,9 @@ pipeline {
             }
         }
 
-        stage('Build Flask Docker Image') {
-            steps {
-                sh '''
-                    docker build \
-                        -t flask-app:v1 \
-                        .
-                '''
-            }
-        }
+       
 
-        stage('Deploy Flask') {
-            steps {
-                withCredentials([
-                    file(
-                        credentialsId: 'k8s-config',
-                        variable: 'KUBECONFIG'
-                    )
-                ]) {
-                    sh '''
-                        set -e
-
-                        kubectl apply -f flask-app.yaml
-
-                        kubectl rollout status \
-                            deployment/flask-app \
-                            --timeout=180s
-
-                        kubectl get pods
-                        kubectl get service flask-app-service
-                    '''
-                }
-            }
-        }
+      
 
         stage('Build Selenium Docker Image') {
             steps {
