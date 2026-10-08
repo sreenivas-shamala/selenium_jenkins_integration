@@ -84,36 +84,7 @@ pipeline {
     }
 }
              
-        stage('Deploy to Kubernetes') {
-            steps {
-                withCredentials([file( credentialsId: 'k8s_config', variable: 'KUBECONFIG' )])
-                { 
-                sh '''
-                               
-                echo "=== Applying deployment ===" 
-                kubectl apply -f selenium-jenkins-app.yaml
-                '''
-               }  
-            }
-        }
-
-        stage('Verify Deployment') {
-            steps {
-                withCredentials([file( credentialsId: 'k8s_config', variable: 'KUBECONFIG' )])
-                {
-                sh '''
-                
-                kubectl get deployments
-
-                kubectl get pods
-               
-                kubectl get services
-                
-                '''
-                }    
-           
-           }
-      }
+        
 
  stage('Run Selenium Tests') {
             steps {
