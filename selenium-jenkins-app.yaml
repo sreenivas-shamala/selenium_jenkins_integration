@@ -1,0 +1,27 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: selenium-test
+spec:
+  backoffLimit: 0
+
+  template:
+    metadata:
+      labels:
+        app: selenium-test
+
+    spec:
+      restartPolicy: Never
+
+      containers:
+        - name: selenium-test
+          image: selenium-tests:v1
+          imagePullPolicy: Always
+
+          command:
+            - mvn
+
+          args:
+            - clean
+            - test
+            - "-Dapp.url=http://flask-app-service"
