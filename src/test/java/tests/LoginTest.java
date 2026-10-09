@@ -37,7 +37,7 @@ public class LoginTest extends BaseTest {
         String bodyText = driver.findElement(By.tagName("body")).getText();
         System.out.println(bodyText);
         
-        Assert.assertTrue(bodyText.toLowerCase().contains("flask"),
+        Assert.assertTrue(bodyText.toLowerCase().contains("fask"),
                 "Flask in Body Text was not found"
         );
     }
