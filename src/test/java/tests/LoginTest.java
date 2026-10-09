@@ -8,7 +8,7 @@ public class LoginTest extends BaseTest {
 
     @Test
     public void verifyGoogleTitle() {
-        String appUrl = System.getProperty("app.url","http://flask-app-service");
+        //String appUrl = System.getProperty("app.url","http://flask-app-service");
 
         //driver.get(appUrl);
         driver.get("https://www.google.com");
@@ -20,6 +20,24 @@ public class LoginTest extends BaseTest {
         Assert.assertTrue(
                 title.toLowerCase().contains("google"),
                 "Google title was not found"
+        );
+    }
+
+    @Test
+    public void verifyFlaskApp() {
+        String appUrl = System.getProperty("app.url","http://flask-app-service");
+
+        driver.get(appUrl);
+
+        String title = driver.getTitle();
+        System.out.println("Page title: " + title);
+        System.out.println("Page Url: " + appUrl);
+
+        String bodyText = driver.findElement(By.tagName("body")).getText();
+        System.out.println(bodyText);
+        
+        Assert.assertTrue(bodyText.toLowerCase().contains("flask"),
+                "Flask in Body Text was not found"
         );
     }
 }
