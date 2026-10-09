@@ -145,6 +145,17 @@ pipeline {
     post {
 
         always {
+
+            junit(
+                testResults: 'target/surefire-reports/*.xml',
+                allowEmptyResults: true
+            )
+
+            archiveArtifacts(
+                artifacts: 'screenshots/**/*.png',
+                allowEmptyArchive: true
+            )
+            
             echo 'Pipeline completed'
         }
 
