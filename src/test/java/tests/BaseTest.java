@@ -8,26 +8,26 @@ import org.testng.annotations.BeforeMethod;
 
 public class BaseTest {
 
-    public WebDriver driver;
+    protected WebDriver driver;
 
     @BeforeMethod
     public void setUp() {
-
         ChromeOptions options = new ChromeOptions();
 
-        options.addArguments("--headless=new");
+        options.addArguments("--headless");
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
+        options.addArguments("--disable-gpu");
         options.addArguments("--window-size=1920,1080");
 
-        driver = new ChromeDriver(options);
+        // Use the Chromium executable installed in the Docker image.
+        options.setBinary("/usr/bin/chromium");
 
-        driver.manage().window().maximize();
+        driver = new ChromeDriver(options);
     }
 
-    @AfterMethod
+    @AfterMethod(alwaysRun = true)
     public void tearDown() {
-
         if (driver != null) {
             driver.quit();
         }
