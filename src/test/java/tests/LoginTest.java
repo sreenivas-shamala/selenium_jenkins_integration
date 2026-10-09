@@ -3,6 +3,7 @@ package test.java.tests;
 import test.java.tests.BaseTest;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import org.openqa.selenium.By;
 
 public class LoginTest extends BaseTest {
 
