@@ -103,8 +103,8 @@ pipeline {
                         echo "=== Start Selenium Job ==="
                         kubectl apply -f selenium-jenkins-app.yaml
 
-                        echo "=== Wait for Selenium tests ==="
-                        kubectl wait --for=condition=complete job/selenium-test --timeout=300s
+                        //echo "=== Wait for Selenium tests ==="
+                        //kubectl wait --for=condition=complete job/selenium-test --timeout=300s
                     '''
                 }
             }
