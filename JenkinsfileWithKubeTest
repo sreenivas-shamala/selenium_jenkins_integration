@@ -108,7 +108,7 @@ pipeline {
             if kubectl wait \
                 --for=condition=complete \
                 job/selenium-test \
-                --timeout=600s; then
+                --timeout=60s; then
                 echo "Selenium tests passed"
             else
                 echo "Selenium Job did not complete successfully"
