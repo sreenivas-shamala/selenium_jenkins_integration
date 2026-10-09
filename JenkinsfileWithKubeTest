@@ -97,14 +97,26 @@ pipeline {
                     sh '''
                         set -e
 
-                        echo "=== Delete previous Selenium Job ==="
-                        kubectl delete job selenium-test --ignore-not-found=true
+            echo "=== Delete previous Selenium Job ==="
+            kubectl delete job selenium-test \
+                --ignore-not-found=true --wait=true
 
-                        echo "=== Start Selenium Job ==="
-                        kubectl apply -f selenium-jenkins-app.yaml
+            echo "=== Start Selenium Job ==="
+            kubectl apply -f selenium-jenkins-app.yaml
 
-                        echo "=== Wait for Selenium tests ==="
-                        # kubectl wait --for=condition=complete job/selenium-test --timeout=300s
+            echo "=== Wait for Selenium tests ==="
+            if kubectl wait \
+                --for=condition=complete \
+                job/selenium-test \
+                --timeout=600s; then
+                echo "Selenium tests passed"
+            else
+                echo "Selenium Job did not complete successfully"
+                kubectl describe job selenium-test || true
+                kubectl get pods -l job-name=selenium-test
+                kubectl logs job/selenium-test --all-containers=true || true
+                exit 1
+            fi
                     '''
                 }
             }
@@ -119,7 +131,8 @@ pipeline {
                     )
                 ]) {
                     sh '''
-                        kubectl logs job/selenium-test
+                        echo "=== Selenium Test Logs ==="
+            kubectl logs job/selenium-test --all-containers=true
                     '''
                 }
             }
