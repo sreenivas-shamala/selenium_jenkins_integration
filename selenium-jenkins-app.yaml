@@ -15,7 +15,7 @@ spec:
 
       containers:
         - name: selenium-test
-          image: selenium-tests:v1
+          image: sreenivasulusamala108/selenium-tests:v1
           imagePullPolicy: Always
 
           command:
