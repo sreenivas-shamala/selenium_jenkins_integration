@@ -18,7 +18,8 @@ RUN mvn -B dependency:go-offline
 
 COPY src ./src
 
-# Verify that both browser executables exist
-RUN chromium --version && chromedriver --version
+# Find the actual executable names and verify versions
+RUN command -v chromium || command -v chromium-browser || command -v google-chrome
+RUN command -v chromedriver && chromedriver --version
 
 CMD ["mvn", "-B", "clean", "test"]
