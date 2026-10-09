@@ -14,16 +14,13 @@ public class BaseTest {
     public void setUp() {
         ChromeOptions options = new ChromeOptions();
 
-        options.addArguments("--headless");
-        options.addArguments("--no-sandbox");
-        options.addArguments("--disable-dev-shm-usage");
-        options.addArguments("--disable-gpu");
-        options.addArguments("--window-size=1920,1080");
+options.setBinary("/usr/bin/google-chrome");
+options.addArguments("--headless");
+options.addArguments("--no-sandbox");
+options.addArguments("--disable-dev-shm-usage");
+options.addArguments("--window-size=1920,1080");
 
-        // Use the Chromium executable installed in the Docker image.
-        options.setBinary("/usr/bin/chromium");
-
-        driver = new ChromeDriver(options);
+driver = new ChromeDriver(options);
     }
 
     @AfterMethod(alwaysRun = true)
