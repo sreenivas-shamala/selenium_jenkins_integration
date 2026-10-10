@@ -24,4 +24,4 @@ spec:
           args:
             - clean
             - test
-            - "-Dapp.url=http://flask-app-service"
+            - "-Dapp.url=http://flask-registration-service"
