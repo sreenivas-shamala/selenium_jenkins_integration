@@ -8,6 +8,7 @@
 
         <classes>
             <class name="test.java.tests.LoginTest"/>
+            <class name="test.java.tests.RegistrationTest"/>
         </classes>
 
     </test>
