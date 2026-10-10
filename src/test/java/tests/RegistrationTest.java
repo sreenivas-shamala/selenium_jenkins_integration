@@ -41,7 +41,7 @@ public class RegistrationTest extends BaseTest {
         driver.findElement(By.cssSelector("button[type='submit']")).click();
 
         String result = driver.findElement(By.tagName("p")).getText();
-        Assert.assertTrue(result.toLowerCase().contains("Registration"),
+        Assert.assertTrue(result.toLowerCase().contains("registration"),
                 "Registration in Paragraph Text was not found"
         );
     }
